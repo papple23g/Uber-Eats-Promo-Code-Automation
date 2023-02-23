@@ -76,7 +76,7 @@ async def get_prmote_str_set(context: BrowserContext) -> Set[str]:
             url (str): 優惠碼頁面連結
 
         Returns:
-            Optional[str]: 優惠碼. 若為 None 則表示該頁面沒有優惠碼.
+            Optional[str]: 優惠碼. 若為 None 則表示該頁面沒有優惠碼，或者為自取優惠碼.
         """
         page = await context.new_page()
         await page.goto(url, timeout=None)
@@ -86,7 +86,11 @@ async def get_prmote_str_set(context: BrowserContext) -> Set[str]:
             r'【(.*)】',
             "\n".join(main_content_str.splitlines()[1:])
         ):
-            logger.info(f'promote_str: {promote_str}')
+            if "自取" in main_content_str:
+                logger.warning(f'promote_str: {promote_str} (自取優惠碼)')
+                return None
+            else:
+                logger.success(f'promote_str: {promote_str}')
             return promote_str
         return None
 
