@@ -14,11 +14,11 @@
 
 import asyncio
 import re
-from typing import List, Optional, Set
+from typing import Optional, Set
 
 import nest_asyncio
 from loguru import logger
-from playwright.async_api import BrowserContext, Page, async_playwright
+from playwright.async_api import BrowserContext, async_playwright
 
 # 開啟巢狀異步，方便於 debug console 中使用執行協程: asyncio.run([cor])
 nest_asyncio.apply()
@@ -32,7 +32,7 @@ async def input_promote(context: BrowserContext, promote_str: str) -> None:
         promote_str (str): 優惠碼
     """
     page = await context.new_page()
-    logger.info(f'進入 UE 輸入優惠碼首頁並等待頁面加載完成 ...')
+    logger.info('進入 UE 輸入優惠碼首頁並等待頁面加載完成 ...')
     promote_page_url = "https://www.ubereats.com/tw/feed?diningMode=DELIVERY&mod=promos&pl=JTdCJTIyYWRkcmVzcyUyMiUzQSUyMiVFOCU4RiVBRiVFNiU5NiVCMCVFOCVBMSU5NzE0MyVFNSVCNyVCNzUxJUU4JTk5JTlGJTIyJTJDJTIycmVmZXJlbmNlJTIyJTNBJTIyQ2hJSm5lTHBGMmtDYURRUkEtcm5vT1NjVHc4JTIyJTJDJTIycmVmZXJlbmNlVHlwZSUyMiUzQSUyMmdvb2dsZV9wbGFjZXMlMjIlMkMlMjJsYXRpdHVkZSUyMiUzQTI0Ljk4MDIzMTclMkMlMjJsb25naXR1ZGUlMjIlM0ExMjEuNTA2MzkwMiU3RA%3D%3D&ps=1"
     await page.goto(promote_page_url)
     promote_input_selector_str = "input[placeholder=輸入優惠序號]"
@@ -53,14 +53,14 @@ async def get_prmote_str_set(context: BrowserContext) -> Set[str]:
         Set[str]: 優惠碼集合
     """
 
-    logger.info(f'進入 UE 首頁並等待頁面加載完成 ...')
+    logger.info('進入 UE 首頁並等待頁面加載完成 ...')
     page = await context.new_page()
     ue_main_page_url = "https://www.ubereats.com"
     await page.goto(ue_main_page_url, timeout=None)
     a_list_selector_str = "#main-content > div > div > div:nth-child(2) > div > div > div > div > div > div > div:nth-child(3) a"
     await page.wait_for_selector(a_list_selector_str, timeout=None)
 
-    logger.info(f'獲取優惠碼頁面連結串列 ...')
+    logger.info('獲取優惠碼頁面連結串列 ...')
     a_list_locator = page.locator(a_list_selector_str)
     a_list_len = await a_list_locator.count()
     url_list = []
@@ -94,7 +94,7 @@ async def get_prmote_str_set(context: BrowserContext) -> Set[str]:
             return promote_str
         return None
 
-    logger.info(f'解析各優惠碼頁面，並取得優惠碼 ...')
+    logger.info('解析各優惠碼頁面，並取得優惠碼 ...')
     promote_str_list = await asyncio.gather(*[
         get_promote_str(url) for url in url_list
     ])
