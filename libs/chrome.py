@@ -1,9 +1,7 @@
 import os
-import signal
-import time
 from dataclasses import dataclass
 from pathlib import Path
-from subprocess import Popen, TimeoutExpired
+from subprocess import Popen
 
 user_data_dir_path = Path(__file__).parent.parent / 'user_data'
 user_data_dir_path.mkdir(exist_ok=True)
@@ -20,6 +18,7 @@ class Chrome:
         for chrom_exe_path_str in [
             "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
             "C:/Program Files/Google/Chrome/Application/chrome.exe",
+            f"C:/Users/{os.getlogin()}/AppData/Local/Google/Chrome/Application/chrome.exe"
         ]:
             if Path(chrom_exe_path_str).exists():
                 break
