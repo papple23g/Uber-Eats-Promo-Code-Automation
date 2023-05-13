@@ -49,30 +49,30 @@ class UberEats:
         return url_list
 
     @classmethod
-    async def get_promote_str(cls, prmote_page_url: str) -> Optional[str]:
-        """ 從優惠碼頁面連結獲取優惠碼
+    async def get_promote_str_list(cls, prmote_page_url: str) -> List[str]:
+        """ 從優惠碼頁面連結獲取優惠碼串列
 
         Args:
             prmote_page_url (str): 優惠碼頁面連結
 
         Returns:
-            Optional[str]: 優惠碼. 若為 None 則表示該頁面沒有優惠碼，或者為自取優惠碼.
+            List[str]
         """
         page = await cls.browser.contexts[0].new_page()
         await page.goto(prmote_page_url, timeout=0)
         main_content_str = await page.inner_text("#main-content", timeout=None)
         await page.close()
+        promote_str_list = []
         for promote_str in re.findall(
             r'輸入【(.*)】',
             "\n".join(main_content_str.splitlines()[1:])
         ):
             if "自取" in main_content_str:
                 logger.warning(f'promote_str: {promote_str} (自取優惠碼)')
-                return None
             else:
                 logger.success(f'promote_str: {promote_str}')
-            return promote_str
-        return None
+                promote_str_list.append(promote_str)
+        return promote_str_list
 
     @classmethod
     async def input_promote(cls, promote_str: str) -> None:
@@ -104,10 +104,13 @@ class UberEats:
 
             logger.info('獲取優惠碼頁面連結串列 ...')
             prmote_page_url_list = await cls.get_prmote_page_url_list()
-            promote_str_set = await asyncio.gather(*[
-                cls.get_promote_str(prmote_page_url)
+            promote_str_list_list = await asyncio.gather(*[
+                cls.get_promote_str_list(prmote_page_url)
                 for prmote_page_url in prmote_page_url_list
             ])
+            promote_str_set = {
+                promote_str for promote_str in sum(promote_str_list_list, [])
+            }
             logger.info('批量輸入優惠碼 ...')
             await asyncio.gather(*[
                 cls.input_promote(promote_str)
